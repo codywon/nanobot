@@ -230,6 +230,9 @@ class AgentLoop:
                     )
             else:
                 final_content = self._strip_think(response.content)
+                # For reasoning models (e.g., Kimi, DeepSeek-R1), content may be empty but reasoning_content has the response
+                if not final_content and response.reasoning_content:
+                    final_content = response.reasoning_content.strip()
                 # Some models send an interim text response before tool calls.
                 # Give them one retry; don't forward the text to avoid duplicates.
                 if not tools_used and not text_only_retried and final_content:
