@@ -20,6 +20,7 @@ from nanobot.agent.tools.message import MessageTool
 from nanobot.agent.tools.registry import ToolRegistry
 from nanobot.agent.tools.shell import ExecTool
 from nanobot.agent.tools.spawn import SpawnTool
+from nanobot.agent.tools.tts import ListVoicesTool, TTSTool
 from nanobot.agent.tools.web import WebFetchTool, WebSearchTool
 from nanobot.bus.events import InboundMessage, OutboundMessage
 from nanobot.bus.queue import MessageBus
@@ -42,6 +43,8 @@ _TOOL_HINTS = {
     "cron": "正在处理定时任务",
     "message": "正在发送消息",
     "spawn": "正在创建子任务",
+    "tts": "正在生成语音",
+    "list_voices": "正在获取语音列表",
 }
 
 
@@ -125,6 +128,8 @@ class AgentLoop:
         self.tools.register(WebFetchTool())
         self.tools.register(MessageTool(send_callback=self.bus.publish_outbound))
         self.tools.register(SpawnTool(manager=self.subagents))
+        self.tools.register(TTSTool())
+        self.tools.register(ListVoicesTool())
         if self.cron_service:
             self.tools.register(CronTool(self.cron_service))
 
@@ -179,7 +184,7 @@ class AgentLoop:
             val = next(iter(tc.arguments.values()), None) if tc.arguments else None
             if not isinstance(val, str):
                 return hint + "..."
-            display = val[:30] + "…" if len(val) > 30 else val
+            display = val[:200] + "…" if len(val) > 200 else val
             return f"{hint}：{display}"
         return "\n".join(_fmt(tc) for tc in tool_calls)
 
@@ -312,7 +317,7 @@ class AgentLoop:
             return OutboundMessage(channel=channel, chat_id=chat_id,
                                   content=final_content or "Background task completed.")
 
-        preview = msg.content[:80] + "..." if len(msg.content) > 80 else msg.content
+        preview = msg.content[:150] + "..." if len(msg.content) > 150 else msg.content
         logger.info("Processing message from {}:{}: {}", msg.channel, msg.sender_id, preview)
 
         key = session_key or msg.session_key
@@ -375,7 +380,7 @@ class AgentLoop:
         if final_content is None:
             final_content = "I've completed processing but have no response to give."
 
-        preview = final_content[:120] + "..." if len(final_content) > 120 else final_content
+        preview = final_content[:200] + "..." if len(final_content) > 200 else final_content
         logger.info("Response to {}:{}: {}", msg.channel, msg.sender_id, preview)
 
         session.add_message("user", msg.content)
