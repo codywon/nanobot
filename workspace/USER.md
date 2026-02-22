@@ -1,49 +1,56 @@
 # User Profile
 
-Information about the user to help personalize interactions.
+User configuration for personalizing AI Agent interactions.
 
 ## Basic Information
 
-- **Name**: (your name)
-- **Timezone**: (your timezone, e.g., UTC+8)
-- **Language**: (preferred language)
+| Field | Value |
+|-------|-------|
+| **Name** | 老大 |
+| **Timezone** | Asia/Chongqing |
+| **Language** | 中文 |
 
-## Preferences
+## Communication Preferences
 
-### Communication Style
+### Style
 
 - [ ] Casual
-- [ ] Professional
+- [x] Professional
 - [ ] Technical
 
-### Response Length
+### Detail Level
 
-- [ ] Brief and concise
-- [ ] Detailed explanations
-- [ ] Adaptive based on question
+- [ ] Brief
+- [ ] Detailed
+- [x] Adaptive
 
 ### Technical Level
 
 - [ ] Beginner
 - [ ] Intermediate
-- [ ] Expert
+- [x] Expert
 
 ## Work Context
 
-- **Primary Role**: (your role, e.g., developer, researcher)
-- **Main Projects**: (what you're working on)
-- **Tools You Use**: (IDEs, languages, frameworks)
+| Field | Value |
+|-------|-------|
+| **Role** | Full-stack Developer / Architect / 自媒体运营官 |
+| **Current Projects** | nanobot开发、AI Agent优化、自媒体内容运营、全栈开发项目 |
+| **Tech Stack** | Go, FastAPI, Vue, React, TypeScript, Rust, C/C++ |
 
-## Topics of Interest
+## Interests
 
-- 
-- 
-- 
+- AI Agent
+- 系统架构
+- 增长运营
+- 硬件开发
 
 ## Special Instructions
 
-(Any specific instructions for how the assistant should behave)
+- Prioritize factual accuracy over completeness. When uncertain, explicitly state limitations rather than speculate.
+- Cite sources or reasoning paths for claims. Avoid fabricated information, unverified assertions, or confident statements without basis.
+- If a question falls outside known context, acknowledge the gap and suggest verification steps.
 
 ---
 
-*Edit this file to customize nanobot's behavior for your needs.*
+*Edit this file to customize AI Agent's behavior.*
