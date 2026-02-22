@@ -31,6 +31,20 @@ if TYPE_CHECKING:
     from nanobot.cron.service import CronService
 
 
+_TOOL_HINTS = {
+    "read_file": "正在读取文件",
+    "write_file": "正在写入文件",
+    "edit_file": "正在编辑文件",
+    "list_dir": "正在列出目录",
+    "web_search": "正在搜索网络",
+    "web_fetch": "正在获取网页",
+    "exec": "正在执行命令",
+    "cron": "正在处理定时任务",
+    "message": "正在发送消息",
+    "spawn": "正在创建子任务",
+}
+
+
 class AgentLoop:
     """
     The agent loop is the core processing engine.
@@ -159,13 +173,15 @@ class AgentLoop:
 
     @staticmethod
     def _tool_hint(tool_calls: list) -> str:
-        """Format tool calls as concise hint, e.g. 'web_search("query")'."""
+        """Format tool calls as human-readable hint."""
         def _fmt(tc):
+            hint = _TOOL_HINTS.get(tc.name, tc.name)
             val = next(iter(tc.arguments.values()), None) if tc.arguments else None
             if not isinstance(val, str):
-                return tc.name
-            return f'{tc.name}("{val[:40]}…")' if len(val) > 40 else f'{tc.name}("{val}")'
-        return ", ".join(_fmt(tc) for tc in tool_calls)
+                return hint + "..."
+            display = val[:30] + "…" if len(val) > 30 else val
+            return f"{hint}：{display}"
+        return "\n".join(_fmt(tc) for tc in tool_calls)
 
     async def _run_agent_loop(
         self,
