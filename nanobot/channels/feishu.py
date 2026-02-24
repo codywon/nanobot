@@ -377,18 +377,53 @@ class FeishuChannel(BaseChannel):
         }
 
     def _build_card_elements(self, content: str) -> list[dict]:
-        """Split content into div/markdown + table elements for Feishu card."""
+        """Split content into div/markdown + table elements for Feishu card.
+        
+        ⚠️ Feishu card limit: max 5 tables per card.
+        Tables exceeding the limit will be converted to list format.
+        """
         elements, last_end = [], 0
+        table_count = 0
+        MAX_TABLES = 5  # 飞书卡片表格数量上限
+        
         for m in self._TABLE_RE.finditer(content):
             before = content[last_end:m.start()]
             if before.strip():
                 elements.extend(self._split_headings(before))
-            elements.append(self._parse_md_table(m.group(1)) or {"tag": "markdown", "content": m.group(1)})
+            
+            # 检查表格数量
+            if table_count < MAX_TABLES:
+                elements.append(self._parse_md_table(m.group(1)) or {"tag": "markdown", "content": m.group(1)})
+            else:
+                # 超过限制，转换为列表格式
+                elements.append(self._convert_table_to_list(m.group(1)))
+                logger.warning(f"Feishu card table limit exceeded, converted table #{table_count + 1} to list format")
+            
+            table_count += 1
             last_end = m.end()
+        
         remaining = content[last_end:]
         if remaining.strip():
             elements.extend(self._split_headings(remaining))
         return elements or [{"tag": "markdown", "content": content}]
+
+    def _convert_table_to_list(self, table_text: str) -> dict:
+        """Convert markdown table to list format when exceeding Feishu limit."""
+        lines = [l.strip() for l in table_text.strip().split("\n") if l.strip()]
+        if len(lines) < 3:
+            return {"tag": "markdown", "content": table_text}
+        
+        split = lambda l: [c.strip() for c in l.strip("|").split("|")]
+        headers = split(lines[0])
+        rows = [split(l) for l in lines[2:]]
+        
+        # 转换为列表格式
+        list_content = []
+        for row in rows:
+            items = [f"**{headers[i]}**: {row[i] if i < len(row) else ''}" for i in range(len(headers))]
+            list_content.append("- " + " | ".join(items))
+        
+        return {"tag": "markdown", "content": "\n".join(list_content)}
 
     def _split_headings(self, content: str) -> list[dict]:
         """Split content by headings, converting headings to div elements."""
